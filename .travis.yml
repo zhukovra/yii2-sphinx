@@ -3,37 +3,23 @@ language: php
 php:
   - 5.4
   - 5.5
-  - 5.6
-  - 7.0
-  - 7.1
-  - 7.2
+#  - 5.6
+#  - 7.0
+#  - 7.1
+#  - 7.2
+
+env:
+  - SPHINX_VERSION=2
 
 # run build against hhvm but allow them to fail
 # http://docs.travis-ci.com/user/build-configuration/#Rows-That-are-Allowed-To-Fail
 matrix:
   fast_finish: true
   allow_failures:
-    - php: hhvm
+    - env: SPHINX_VERSION=3
   include:
-    # test against the latest HHVM version by using a newer image
-    - php: hhvm
-      sudo: true
-      dist: trusty
-      group: edge # Use edge image until the next travis CI image update
-      addons:
-        apt:
-          packages:
-            - mysql-server-5.6
-            - mysql-client-core-5.6
-            - mysql-client-5.6
-          services:
-            - mysql
-      before_install:
-        - composer require --prefer-dist --no-interaction 'phpunit/phpunit:<6.0'
-        - mysql -e "CREATE USER 'travis'@'localhost' IDENTIFIED WITH mysql_native_password;";
-        - mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'travis'@'localhost' WITH GRANT OPTION;";
-      script:
-        - vendor/bin/phpunit --verbose $PHPUNIT_FLAGS
+    - php: 5.4
+      env: SPHINX_VERSION=3
 
 services:
   - mysql
@@ -65,3 +51,7 @@ before_script:
 
 script:
   - vendor/bin/phpunit --verbose $PHPUNIT_FLAGS
+
+after_script:
+  - cat sphinx/searchd.log
+  - cat sphinx/query.log
